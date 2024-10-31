@@ -337,7 +337,10 @@ class DXLinkStreamer:
     """
 
     def __init__(
-        self, session: Session, ssl_context: SSLContext = create_default_context()
+        self,
+        session: Session,
+        ssl_context: SSLContext = create_default_context(),
+        aggregation_period: float = 10,
     ):
         self._counter = 0
         self._lock: Lock = Lock()
@@ -354,6 +357,7 @@ class DXLinkStreamer:
             "Underlying": 17,
         }
         self._subscription_state: Dict[str, str] = defaultdict(lambda: "CHANNEL_CLOSED")
+        self._aggregation_period = aggregation_period
 
         #: The unique client identifier received from the server
         self._session = session
@@ -569,7 +573,7 @@ class DXLinkStreamer:
         message = {
             "type": "FEED_SETUP",
             "channel": self._channels[event_type],
-            "acceptAggregationPeriod": 10,
+            "acceptAggregationPeriod": self._aggregation_period,
             "acceptDataFormat": "COMPACT",
         }
 
